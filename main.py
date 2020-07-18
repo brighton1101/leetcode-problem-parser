@@ -5,7 +5,7 @@ Author: Brighton Balfrey
 For scraping name, difficulty, and description for problems
 on Leetcode. Requires dependencies outlined in `requirements.txt` along
 with a chromedriver executable in the dir that the script is called.
-Furthermore, a `leetcode.html` html file is also required in the same
+Furthermore, a `html/leetcode` html file is also required in the same
 dir. This HTML is a full list of every leetcode question on leetcode.com.
 Because that is a central source of truth that we want to remain static
 and version, we keep the version of that page checked into the same
@@ -25,7 +25,7 @@ truth' html file, initializing Beautiful Soup, initializing Selenium Webdriver
 """
 CHROME_DRIVER_PATH = "./chromedriver"
 os.chmod(CHROME_DRIVER_PATH, 755)
-problem_list_html = open("leetcode.html").read()
+problem_list_html = open("html/leetcode_01").read()
 LEETCODE_BASE_PROBLEM_URL = "https://leetcode.com/problems/"
 bs_problem_list = BeautifulSoup(problem_list_html, 'html5lib')
 driver = webdriver.Chrome(executable_path=CHROME_DRIVER_PATH)
