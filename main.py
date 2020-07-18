@@ -46,13 +46,15 @@ class Page_Result :
 	"""
 	Helper class to store results from individual problems' pages.
 	"""
-	def __init__(self, uri, name, difficulty, description) :
+	def __init__(self, uri, id, name, difficulty, description) :
 		self.name = name
+		self.id = id
 		self.difficulty = difficulty
 		self.description = description
 		self.uri = uri
 	def toDict() :
 		return {
+			"id": self.id,
 			"title": self.name,
 			"uri": self.uri,
 			"difficulty": self.difficulty,
@@ -72,7 +74,8 @@ def parse_pages(problem_list) :
 		while driver.title.lower() == "loading..." or driver.title.lower() == "loading question... leetcode" or driver.title.lower() == "Loading Question...": 
 			time.sleep(1)
 		try :
-			question_title = driver.title.replace(" - LeetCode", "")	
+			question_title = driver.title.replace(" - LeetCode", "")
+			question_id = driver.find_element_by_css_selector('.css-v3d350').text.split('.')[0].strip()
 			difficulty_unparsed = driver.find_element_by_css_selector(".css-10o4wqw").text
 			difficulty = ''.join(
 				[c for c in difficulty_unparsed if not c.isdigit()]
@@ -80,6 +83,7 @@ def parse_pages(problem_list) :
 			content = driver.find_element_by_xpath("//div[contains(@class, 'content__u3I1') and contains(@class, 'question-content__JfgR')]").text
 			results.append(
 				Page_Result(problem_uri,
+					question_id,
 					question_title,
 					difficulty,
 					content
