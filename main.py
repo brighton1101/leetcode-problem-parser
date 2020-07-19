@@ -5,7 +5,7 @@ Author: Brighton Balfrey
 For scraping name, difficulty, and description for problems
 on Leetcode. Requires dependencies outlined in `requirements.txt` along
 with a chromedriver executable in the dir that the script is called.
-Furthermore, a `leetcode.html` html file is also required in the same
+Furthermore, a `html/leetcode` html file is also required in the same
 dir. This HTML is a full list of every leetcode question on leetcode.com.
 Because that is a central source of truth that we want to remain static
 and version, we keep the version of that page checked into the same
@@ -25,7 +25,7 @@ truth' html file, initializing Beautiful Soup, initializing Selenium Webdriver
 """
 CHROME_DRIVER_PATH = "./chromedriver"
 os.chmod(CHROME_DRIVER_PATH, 755)
-problem_list_html = open("leetcode.html").read()
+problem_list_html = open("html/leetcode_01").read()
 LEETCODE_BASE_PROBLEM_URL = "https://leetcode.com/problems/"
 bs_problem_list = BeautifulSoup(problem_list_html, 'html5lib')
 driver = webdriver.Chrome(executable_path=CHROME_DRIVER_PATH)
@@ -46,13 +46,15 @@ class Page_Result :
 	"""
 	Helper class to store results from individual problems' pages.
 	"""
-	def __init__(self, uri, name, difficulty, description) :
+	def __init__(self, uri, id, name, difficulty, description) :
 		self.name = name
+		self.id = id
 		self.difficulty = difficulty
 		self.description = description
 		self.uri = uri
 	def toDict() :
 		return {
+			"id": self.id,
 			"title": self.name,
 			"uri": self.uri,
 			"difficulty": self.difficulty,
@@ -72,7 +74,8 @@ def parse_pages(problem_list) :
 		while driver.title.lower() == "loading..." or driver.title.lower() == "loading question... leetcode" or driver.title.lower() == "Loading Question...": 
 			time.sleep(1)
 		try :
-			question_title = driver.title.replace(" - LeetCode", "")	
+			question_title = driver.title.replace(" - LeetCode", "")
+			question_id = driver.find_element_by_css_selector('.css-v3d350').text.split('.')[0].strip()
 			difficulty_unparsed = driver.find_element_by_css_selector(".css-10o4wqw").text
 			difficulty = ''.join(
 				[c for c in difficulty_unparsed if not c.isdigit()]
@@ -80,6 +83,7 @@ def parse_pages(problem_list) :
 			content = driver.find_element_by_xpath("//div[contains(@class, 'content__u3I1') and contains(@class, 'question-content__JfgR')]").text
 			results.append(
 				Page_Result(problem_uri,
+					question_id,
 					question_title,
 					difficulty,
 					content
