@@ -12,6 +12,7 @@ and version, we keep the version of that page checked into the same
 repository as the script.
 """
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 from threading import Thread
 import time
@@ -23,12 +24,17 @@ Some initial setup that can be played with. Location of the chromedriver
 executable, giving that executable permissions, opening up the 'source of
 truth' html file, initializing Beautiful Soup, initializing Selenium Webdriver
 """
-CHROME_DRIVER_PATH = "./chromedriver"
+CHROME_DRIVER_PATH = os.getenv("CHROME_DRIVER_PATH", default="./chromedriver")
 os.chmod(CHROME_DRIVER_PATH, 755)
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument("--disable-setuid-sandbox")
 problem_list_html = open("html/leetcode_01").read()
 LEETCODE_BASE_PROBLEM_URL = "https://leetcode.com/problems/"
 bs_problem_list = BeautifulSoup(problem_list_html, 'html5lib')
-driver = webdriver.Chrome(executable_path=CHROME_DRIVER_PATH)
+driver = webdriver.Chrome(executable_path=CHROME_DRIVER_PATH, options=chrome_options)
 
 def get_all_leetcode_problem_links(problem_list, base_url) :
 	"""
@@ -52,7 +58,7 @@ class Page_Result :
 		self.difficulty = difficulty
 		self.description = description
 		self.uri = uri
-	def toDict() :
+	def toDict(self) :
 		return {
 			"id": self.id,
 			"title": self.name,
@@ -71,7 +77,7 @@ def parse_pages(problem_list) :
 	def parse_page(problem_uri) :
 		driver.get(problem_uri)
 		time.sleep(3)
-		while driver.title.lower() == "loading..." or driver.title.lower() == "loading question... leetcode" or driver.title.lower() == "Loading Question...": 
+		while driver.title.lower() == "loading..." or driver.title.lower() == "loading question... leetcode" or driver.title.lower() == "loading question...": 
 			time.sleep(1)
 		try :
 			question_title = driver.title.replace(" - LeetCode", "")
@@ -107,7 +113,7 @@ def run() :
 	res['results'] = [p.toDict() for p in problems]
 	print(res)
 	with open("result.json", 'w') as f :
-		json.dump(res, f)
+		json.dump(obj=res, fp=f, indent=4)
 
 if __name__ == "__main__":
 	run()
