@@ -178,8 +178,6 @@ def parse_pages(problem_list) :
 				)
 			)
 			for t in topics : question_topics.add(t)
-			print(results)
-			print(topics)
 		# We want our script to continue and not error out
 		except Exception as e :
 			print("Error {}".format(e))
@@ -192,10 +190,11 @@ def run() :
 	when we figure out what more we need to add, more will be added.
 	"""
 	problem_uris = get_all_leetcode_problem_links(bs_problem_list, LEETCODE_BASE_PROBLEM_URL)
-	problems = parse_pages(problem_uris)
+	problems, topics = parse_pages(problem_uris)
 	res = {}
 	res['status'] = "success"
 	res['results'] = [p.toDict() for p in problems]
+	res['topics'] = [t.toDict() for t in topics]
 	print(res)
 	with open("result.json", 'w') as f :
 		json.dump(obj=res, fp=f, indent=4)
